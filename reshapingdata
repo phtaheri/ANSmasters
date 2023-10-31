@@ -1,0 +1,103 @@
+library(tidyr)
+library(dplyr)
+library(openxlsx)
+library(reshape2)
+library(stringr)
+
+setwd("/Users/parsanajmaie/Desktop/PhD/ANS Masters")
+
+#import long file - has two within subjects factors (region - 8 levels, band - 7  levels )
+RSA_30_sec <- read.csv('/Users/parsanajmaie/Desktop/PhD/ANS Masters/physio_data_FINAL_30_3.21.csv')
+
+#to go from long to wide, need two tranforms (one for each within subjects factor)
+
+df_wide <- pivot_wider(df, id_cols = id, names_from = variable, values_from = value)
+
+RSA_30_t<- pivot_wider(RSA_30_sec, id_cols = "RSA_30_sec$Start.Event", names_from =  )
+
+RSA_30_wide <- spread(RSA_30_sec, key = "Start.Event", value = "")
+
+#first i need to transpose the data to get it in the right format: 
+RSA_30_t <- t(RSA_30_sec)
+
+#export csv
+
+write.csv(RSA_30_t, file = "RSA_30_transposed.csv")
+  
+#next we're going to import it again and merge columns: 
+RSA_30_trans <- read.csv('/Users/parsanajmaie/Desktop/PhD/ANS Masters/RSA_30_transposed_3.21.csv', check.names = FALSE)
+#check.names = FALSE
+
+#let's convert our wide data to long data: 
+
+#first, let's make sure everything is a character to avoid issues: 
+RSA_30_trans_c <- as.data.frame(lapply(RSA_30_trans, as.character), stringsAsFactors = FALSE)
+
+##THIS IS HOW TO CONVERT THIS DATA FROM WIDE TO LONG: 
+
+# First: split dataframe into a list of dataframes, there are 43 participants with 6 columns each. 
+df_wide <- RSA_30_trans_c 
+df_list <- split.default(df_wide, rep(1:43, each = 6))
+
+df_list
+
+#remove names of columns 
+df_list <- lapply(df_list, function(df) { setNames(df, rep("", ncol(df))) })
+
+# Combine dataframes vertically
+combined_df <- na.omit(do.call(rbind, df_list))
+
+combined_df
+
+#now i'm going to rename the dataframe to what I want it to be: 
+
+RSA_30_trans_long <- combined_df
+
+#export CSV: 
+write.csv(RSA_30_trans_long, file = "RSA_30_long_3.28.csv")
+
+
+###########now we have to do the same thing but for 60 second data!
+
+#first upload data: 
+RSA_60_sec <- read.csv('/Users/parsanajmaie/Desktop/PhD/ANS Masters/physio_data_FINAL_60_3.21.csv')
+
+
+#first i need to transpose the data to get it in the right format: 
+RSA_60_t <- t(RSA_60_sec)
+
+#export csv
+
+write.csv(RSA_60_t, file = "RSA_60_transposed.csv")
+
+#next we're going to import it again and merge columns: 
+RSA_60_trans <- read.csv('/Users/parsanajmaie/Desktop/PhD/ANS Masters/RSA_60_transposed_3.28.csv', check.names = FALSE)
+#check.names = FALSE
+
+#let's convert our wide data to long data: 
+
+#first, let's make sure everything is a character to avoid issues: 
+RSA_60_trans_c <- as.data.frame(lapply(RSA_60_trans, as.character), stringsAsFactors = FALSE)
+
+##THIS IS HOW TO CONVERT THIS DATA FROM WIDE TO LONG: 
+
+# First: split dataframe into a list of dataframes, there are 43 participants with 6 columns each. 
+df_wide <- RSA_60_trans_c 
+df_list <- split.default(df_wide, rep(1:43, each = 6))
+
+df_list
+
+#remove names of columns 
+df_list <- lapply(df_list, function(df) { setNames(df, rep("", ncol(df))) })
+
+# Combine dataframes vertically
+combined_df <- na.omit(do.call(rbind, df_list))
+
+combined_df
+
+#now i'm going to rename the dataframe to what I want it to be: 
+
+RSA_60_trans_long <- combined_df
+
+#export CSV: 
+write.csv(RSA_60_trans_long, file = "RSA_60_long_3.28.csv")
